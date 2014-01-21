@@ -1,23 +1,30 @@
 /**
  * Perfwatcher jsTree config
  *
- * Javascript
+ * Copyright (c) 2011 Cyril Feraudet
  *
- * LICENSE: This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
  *
  * @category  Monitoring
  * @author    Cyril Feraudet <cyril@feraudet.com>
  * @copyright 2011 Cyril Feraudet
- * @license   http://www.gnu.org/copyleft/lesser.html  LGPL License 2.1
+ * @license   http://opensource.org/licenses/mit-license.php
  * @link      http://www.perfwatcher.org/
  **/ 
 
@@ -104,17 +111,24 @@ $(function () {
 		    },
 		    "default-red" : { "valid_children" : "none", "icon" : { "image" : "img/file-red.png" } },
 		    "default-green" : { "valid_children" : "none", "icon" : { "image" : "img/file-green.png" } },
+		    "selection" : {
+				// I want this type to have no children (so only leaf nodes)
+				// In my case - those are selections
+				"valid_children" : "none",
+				// If we specify an icon for the default type it WILL OVERRIDE the theme icons
+				"icon" : { "image" : "img/selection.png" }
+		    },
 		    // The `folder` type
 		    "folder" : {
 				// can have files and other folders inside of it, but NOT `drive` nodes
-				"valid_children" : [ "default", "default-red", "default-grey", "default-green", "folder" ],
+				"valid_children" : [ "default", "default-red", "default-grey", "default-green", "folder", "selection" ],
 				"icon" : { "image" : "img/folder.png" }
 		    },
 		    // The `drive` nodes 
 		    "drive" : {
 				// can have files and folders inside, but NOT other `drive` nodes
-				"valid_children" : [ "default", "default-red", "default-grey", "default-green", "folder" ],
-				"icon" : { "image" : "img/folder.png" },
+				"valid_children" : [ "default", "default-red", "default-grey", "default-green", "folder", "selection" ],
+				"icon" : { "image" : "img/root.png" },
 				// those options prevent the functions with the same name to be used on the `drive` type nodes
 				// internally the `before` event is used
 				"start_drag" : false,
@@ -149,15 +163,21 @@ $(function () {
 			"submenu"           	: {
 			    "createserver" 	: {
 				"separator_before"	: false,
-				"separator_after"	: true,
+				"separator_after"	: false,
 				"label"			: "Server",
-				"action"		: function (obj) { this.create(obj); }
+				"action"		: function (obj) { this.create(obj, "last", { "attr" : { "rel" : "default", "pwtype" : "server" } }); }
+			    },
+			    "createselection" 	: {
+				"separator_before"	: false,
+				"separator_after"	: true,
+				"label"			: "Selection",
+				"action"		: function (obj) { this.create(obj, "last", { "attr" : { "rel" : "selection", "pwtype" : "selection" } }); }
 			    },
 			    "createfolder" 	: {
 				"separator_before"	: false,
 				"separator_after"	: true,
 				"label"			: "Folder",
-				"action"		: function (obj) { this.create(obj, "last", { "attr" : { "rel" : "folder" } }); }
+				"action"		: function (obj) { this.create(obj, "last", { "attr" : { "rel" : "folder", "pwtype" : "container" } }); }
 			    }
 			}
 		    }
@@ -173,7 +193,7 @@ $(function () {
 		    "id" : data.rslt.parent.attr("id").replace("node_",""), 
 		    "position" : data.rslt.position,
 		    "title" : data.rslt.name,
-		    "type" : data.rslt.obj.attr("rel")
+		    "pwtype" : data.rslt.obj.attr("pwtype")
 		}, 
 		function (r) {
 		    if(r.status) {
@@ -263,9 +283,8 @@ $(function () {
 			nodes.shift();
 			recurse_open_node(nodes);
 		} else if(nodes[0] == 'host') {
-			var host;
-			host = location.hash.substr(6);
-			select_node_by_name(host);
+			var fullhost = location.hash.substr(6);
+			select_node_by_name(fullhost);
 			$('#mainSplitter').jqxSplitter('collapseAt', 0);
 			treecollapsed = true;
 		}
@@ -280,3 +299,5 @@ $(function () {
 		}
 	}
 });
+
+// vim: set filetype=javascript fdm=marker sw=4 ts=4 et:

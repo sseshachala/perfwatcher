@@ -1,3 +1,4 @@
+<!-- Perfwatcher | File "load_meter.html" | Copyright (c) 2012 Cyril Feraudet | Licensed under the MIT licenses: http://www.opensource.org/licenses/mit-license.php -->
 <script type="text/javascript">
 var current_load1 = 0;
 var current_load5 = 0;
@@ -8,13 +9,18 @@ $(function () {
 
 	function get_load(hosts) {
 		var metrics = new Array();
+//
+// NOTE : this used to be used to get the load for all the hosts of a container.
+// This feature was removed and now $(hosts) contains only one host name.
+// Future : either rewrite to display the load for a container, or remove the $.each().
+//
 		$(hosts).each(function (key, val) {
 			metrics.push(val+'/load/load');
 		});
 		$.ajax({
 			async: true,
 			type: 'POST',
-			url: 'action.php?tpl=jsonrpc',
+			url: 'action.php?tpl=jsonrpc&cdsrc='+json_item_datas['config']['CdSrc']['source'],
 			data: JSON.stringify({"jsonrpc": "2.0", "method": "getval", "params": metrics, "id": 0}),
 			dataType: 'json',
 			cache: false, 

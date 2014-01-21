@@ -1,3 +1,4 @@
+<!-- Perfwatcher | File "vu_cpu_memory.html" | Copyright (c) 2012 Cyril Feraudet | Licensed under the MIT licenses: http://www.opensource.org/licenses/mit-license.php -->
 <script type="text/javascript">
 var current_cpu = 0;
 var current_mem = 0;
@@ -5,6 +6,11 @@ var current_nbcpu = 0;
 var current_real_cpu = 0;
 var current_load = 0;
 $(function () {
+//
+// NOTE : this used to be used to get the cpu/mem for all the hosts of a container.
+// This feature was removed and now json_item_datas['hosts'] contains only one host name.
+// Future : if you want to display for more than 1 host, check that it still works.
+//
 	get_cpu_memory(json_item_datas['hosts']);
 	window.setInterval(function() { get_cpu_memory(json_item_datas['hosts']); }, 60000);
 
@@ -21,7 +27,7 @@ $(function () {
 		$.ajax({
 			async: true,
 			type: 'POST',
-			url: 'action.php?tpl=jsonrpc',
+			url: 'action.php?tpl=jsonrpc&cdsrc='+json_item_datas['config']['CdSrc']['source'],
 			data: JSON.stringify({"jsonrpc": "2.0", "method": "getval", "params": metrics, "id": 0}),
 			dataType: 'json',
 			cache: false, 

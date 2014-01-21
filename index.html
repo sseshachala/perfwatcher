@@ -1,25 +1,36 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
-
 <html>
+<!--
+ Perfwatcher index.html
+
+ Copyright (c) 2011 Cyril Feraudet
+
+ Licensed under the MIT licenses:
+ http://www.opensource.org/licenses/mit-license.php
+-->
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
         <title>PerfWatcher</title>
         <style type="text/css" media="screen">
         @import "js/vendor/jqwidgets/styles/jqx.base.css";
-        @import "css/jquery.ui.all.css";
+        @import "css/vendor/jquery-ui/smoothness/jquery-ui-1.10.3.custom.min.css";
         @import "css/jquery.contextMenu.css";
         @import "css/jquery.multiselect.css";
         @import "css/jquery.multiselect.filter.css";
+        @import "css/pwselections.css";
+        @import "css/pwmenubar.css";
         @import "css/perfwatcher.css";
 		@import "css/jquery.noty.css";
 		@import "css/noty_theme_default.css";
         </style>
+		<link rel="stylesheet" type="text/css" href="css/vendor/almende/timeline/timeline.css">
 		<link rel="icon" type="image/ico" href="img/perfwatcher.ico">
+		<script type="text/javascript" src="js/vendor/almende/timeline/timeline-min.js"></script>
         <script type="text/javascript" src="js/vendor/jquery/jquery.js"></script>
         <script type="text/javascript" src="js/vendor/jquery/jquery.cookie.js"></script>
         <script type="text/javascript" src="js/vendor/jquery/jquery.hotkeys.js"></script>
         <script type="text/javascript" src="js/vendor/jquery/jquery.jstree.js"></script>
-        <script type="text/javascript" src="js/vendor/jquery/jquery-ui.js"></script>
+        <script type="text/javascript" src="js/vendor/jquery/jquery-ui-1.10.3.custom.min.js"></script>
         <script type="text/javascript" src="js/vendor/jquery/ICanHaz.min.js"></script>
         <script type="text/javascript" src="js/vendor/jquery/jquery.noty.js"></script>
     	<script type="text/javascript" src="js/vendor/jqwidgets/jqxcore.js"></script>
@@ -43,19 +54,24 @@
     	<script type="text/javascript" src="js/vendor/jqwidgets/gettheme.js"></script>
         <script type="text/javascript" src="js/vendor/jquery/jquery.multiselect.min.js"></script>
         <script type="text/javascript" src="js/vendor/jquery/jquery.multiselect.filter.js"></script>
-        <script type="text/javascript" src="js/vendor/jquery/jquery.contextMenu.js"></script>
+        <script type="text/javascript" src="js/vendor/jquery/jquery.ui-contextmenu.min.js"></script>
         <script type="text/javascript" src="js/pwgraph.js"></script>
         <script type="text/javascript" src="js/config.jstree.js"></script>
         <script type="text/javascript" src="js/perfwatcher.functions.js"></script>
+        <script type="text/javascript" src="js/pwselection.js"></script>
+        <script type="text/javascript" src="js/perfwatcher.clipboard.js"></script>
         <script type="text/javascript" src="js/perfwatcher.js"></script>
         <script type="text/javascript" src="js/vendor/highchart/highcharts.js"></script>
         <script type="text/javascript" src="js/vendor/highchart/highcharts-more.js"></script>
-		<script id="custom_view_default" src="html/custom_view_default.html" type="text/html"></script>
-		<script id="custom_view_folder" src="html/custom_view_folder.html" type="text/html"></script>
+        <script type="text/javascript" src="js/vendor/showdown/showdown.min.js"></script>
+        <script type="text/javascript" src="js/markdown_rrdgraph.js"></script>
+		<script id="custom_view_selection" src="html/custom_view_selection.html" type="text/html"></script>
 		<script id="information_tab" src="html/information_tab.html" type="text/html"></script>
 		<script id="confirmfor" src="html/confirmfor.html" type="text/html"></script>
 		<script id="askfor" src="html/askfor.html" type="text/html"></script>
 		<script id="mainMenutpl" src="html/mainMenu.html" type="text/html"></script>
+		<script id="headerCentertpl" src="html/headerCenter.html" type="text/html"></script>
+		<script id="headerRighttpl" src="html/headerRight.html" type="text/html"></script>
 		<script id="timebuttontpl" src="html/timebutton.html" type="text/html"></script>
 		<script id="widget" src="html/widget.html" type="text/html"></script>
 		<script id="contextmenutpl" src="html/contextmenu.html" type="text/html"></script>
@@ -67,16 +83,24 @@
 		</script>
     </head>
     <body>
-		<div id="mainMenu" style="visibility: hidden"></div>
-		<div id="modalwindow"><div id="modalwindowheader"><span></span></div><div style="overflow: hidden;" id="modalwindowcontent"></div></div>
+		<div id="mainMenu">
+			<div id="headerLeft"></div>
+			<div id="headerCenter"></div>
+			<div id="headerRight"></div>
+		</div>
+		<div id="modaldialog"></div>
 		<div id="datetime"></div>
 		<div id="timebutton"></div>
 		<div id="timespan"></div>
 		<div id="contextmenu"></div>
 		<div id="mainSplitter">
-			<div id="tree"></div>
-			<div id="items">
-				<div id="itemtab"></div>
+			<div id="leftpane">
+				<div id="tree"></div>
+			</div>
+			<div id="rightpane">
+				<div id="items">
+					<div id="itemtab"></div>
+				</div>
 			</div>
 		</div>
 	</body>

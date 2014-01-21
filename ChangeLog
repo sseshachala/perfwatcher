@@ -1,3 +1,33 @@
+2014-??-??, Version 2.0
+
+- New configuration table in db
+- New tabs system : using markup language
+- New node type : selections. Those are empty nodes where you can add tabs (with markup language)
+- No more local access to Collectd. Only using remote features (need jsonrpc plugin)
+- Possible use of multiple Collectd sources (need to configure 'cdsrc')
+- bin/aggregator.conf uses a configurable path to generate aggregator configuration files
+- Upgrade to jquery-ui-1.10.3
+- Using JQuery-UI portlets
+- Added FreeBSD colors for memory graphs (anonymous user request)
+- New icon for left tree root
+- Removed vu_cpu_meter and load_meter for folders
+- New syntax for direct host/tab access : #host_/source/host(/tab)
+- fixed memory definitions for SSC Serv
+- 'Processes' tab now has filters
+- New menu design
+- New clipboard feature to store graph definitions (for copy/paste to selections)
+- New zoom on graph. The new one is intuitive.
+- Peuplator can now clean the database (remove orphan items)
+- Removed "export" broken feature for graphs.
+- Disambiguation for licenses in some files
+- Removed keyboard navigation in tabs to prevent conflicts with edition in tabs
+
+2013-08-29, Version 1.3
+
+- Fixed bug #33 (Broken aggregators / an aggregator for "n")
+- new URL syntax : #host_<hostname>/<plugin> (replaces undocumented #host_<hostname>)
+- New feature : timeline
+
 2013-04-29, Version 1.2
 
 - New feature : in folder tabs, you can now display folder aggregators. Previously only aggregators (for the selected folder) and hosts/plugins could be shown.

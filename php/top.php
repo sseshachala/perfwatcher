@@ -1,8 +1,44 @@
 <?php # vim: set filetype=php fdm=marker sw=4 ts=4 et : 
+/**
+ * Copyright (c) 2012 Cyril Feraudet
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ *
+ * @category  Monitoring
+ * @author    Cyril Feraudet <cyril@feraudet.com>
+ * @copyright 2012 Cyril Feraudet
+ * @license   http://opensource.org/licenses/mit-license.php
+ * @link      http://www.perfwatcher.org/
+ **/ 
 #
 //header("Content-type: application/json");
 $host = get_arg('host', 0, 0, "Error : No valid host found !!!", __FILE__, __LINE__);
 $view_id = get_arg('view_id', 0, 1, "Error : No valid view_id found !!!", __FILE__, __LINE__);
+$collectd_source = get_arg('cdsrc', 0, 0, "", __FILE__, __LINE__);
+if(isset($collectd_source) && $collectd_source && isset($collectd_sources[$collectd_source])) {
+    $url_jsonrpc = $collectd_sources[$collectd_source]['jsonrpc'];
+    $proxy_jsonrpc = isset($collectd_sources[$collectd_source]['proxy'])?$collectd_sources[$collectd_source]['proxy']:null;
+} else {
+    pw_error_log("This line should not be executed. Please tell us...",  __FILE__, __LINE__);
+    $url_jsonrpc = "http://127.0.0.1:8080/";
+    $proxy_jsonrpc = null;
+}
 
 // ps-1335804082.gz
 $time = isset($_GET['time']) ? $_GET['time'] : time();
@@ -14,10 +50,10 @@ $json2 = json_encode(array("jsonrpc" => "2.0","method" => "topps_get_top","param
 
 putenv('http_proxy');
 putenv('https_proxy');
-$ch = curl_init($jsonrpc_topps_server);
+$ch = curl_init($url_jsonrpc);
 curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "POST");
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-curl_setopt($ch, CURLOPT_HTTPPROXYTUNNEL, $jsonrpc_topps_httpproxy == null ? FALSE : TRUE);
+curl_setopt($ch, CURLOPT_HTTPPROXYTUNNEL, $proxy_jsonrpc == null ? FALSE : TRUE);
 curl_setopt($ch, CURLOPT_POSTFIELDS, $json1);
 curl_setopt($ch, CURLOPT_HTTPHEADER, array(
             'Content-Type: application/json',

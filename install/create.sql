@@ -5,15 +5,33 @@ CREATE TABLE tree (
   parent_id bigint(20) unsigned NOT NULL,
   position  bigint(20) unsigned NOT NULL,
   title     varchar(255) DEFAULT NULL,
-  type      varchar(255) DEFAULT NULL,
+  pwtype    varchar(255) DEFAULT NULL,
+  agg_id    bigint(20) unsigned DEFAULT NULL,
   datas     text NOT NULL,
   PRIMARY KEY (id),
   UNIQUE KEY id (id,parent_id),
   KEY view_id (view_id),
   KEY title (title),
-  KEY type (type),
+  KEY pwtype (pwtype),
   KEY id_2 (id,title)
 );
 
-INSERT INTO tree (id,view_id, parent_id,position,title,type) VALUES (2,1,1,0,'Default view', 'folder');
+CREATE TABLE selections (
+  id           bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  tree_id      bigint(20) unsigned NOT NULL,
+  title        varchar(255) DEFAULT NULL,
+  deleteafter  bigint(20) unsigned NOT NULL,
+  data         text                NOT NULL,
+  PRIMARY KEY  (id),
+  KEY          (tree_id)
+);
+
+CREATE TABLE config (
+  confkey      varchar(255) NOT NULL,
+  value        text         NOT NULL,
+  PRIMARY KEY  (confkey)
+);
+
+INSERT INTO tree (id,view_id, parent_id,position,title, pwtype) VALUES (2,1,1,0,'Default view', 'container');
+INSERT INTO config (confkey, value) VALUES ('schema_version', '1.0');
 

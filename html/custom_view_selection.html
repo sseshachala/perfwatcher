@@ -1,0 +1,96 @@
+<!-- Perfwatcher | File "custom_view_selection.html" | Copyright (c) 2013 Yves Mettier | Licensed under the MIT licenses: http://www.opensource.org/licenses/mit-license.php -->
+<div>
+	<script type="text/javascript">
+	$(function () {
+		var selection = $('.selection_command[tabid="{{ tabid }}"]').pwselection({tabid: "{{ tabid }}", selection_id : "{{ selection_id }}" });
+
+		$(selection)
+			.pwselection('load_markup')
+			.pwselection('switch_to_show');
+
+		$('.selection_command[tabid="{{ tabid }}"] input[class="selection_btn_edit"]').click(function() {
+			selection.pwselection('switch_to_edit');
+		});
+		$('.selection_command[tabid="{{ tabid }}"] input[class="selection_btn_reload"]').click(function() {
+			selection.pwselection('load_markup');
+		});
+		$('.selection_command[tabid="{{ tabid }}"] input[class="selection_btn_save"]').click(function() {
+			selection.pwselection('save_markup');
+		});
+		$('.selection_command[tabid="{{ tabid }}"] input[class="selection_btn_show"]').click(function() {
+			selection.pwselection('switch_to_show');
+		});
+		$('.selection_command[tabid="{{ tabid }}"] input[class="selection_btn_save_show"]').click(function() {
+			selection.pwselection('save_markup');
+			selection.pwselection('switch_to_show');
+		});
+		$('.selection_command[tabid="{{ tabid }}"] input[class="selection_btn_paste"]').click(function() {
+			var cliptext = '';
+			$.each(clipboard, function(i,txt) { cliptext += txt + "\n"; });
+			$('.selection_edit[tabid="{{ tabid }}"] textarea').insertAtCaret(cliptext);
+		});
+		$('.selection_command[tabid="{{ tabid }}"] input[class="selection_btn_showclip"]').click(function() {
+			selection.pwselection('show_clipboard_contents');
+		});
+		
+	});
+
+	$( "#selection_help_portlet .portlet" ).addClass( "ui-widget ui-widget-content ui-helper-clearfix ui-corner-all" )
+			.find( ".portlet-header" )
+			.addClass( "ui-widget-header ui-corner-all" )
+			.prepend( "<span class='ui-icon ui-icon-minusthick'></span>")
+			.end()
+		.find( ".portlet-content" )
+			.end()
+		.find( ".portlet-content div" )
+			.removeClass()
+			.addClass("widget-contents")
+			.end();
+	$( "#selection_help_portlet .portlet-header .ui-icon" ).click(function() {
+			$( this ).toggleClass( "ui-icon-minusthick" ).toggleClass( "ui-icon-plusthick" );
+			$( this ).parents( ".portlet:first" ).find( ".portlet-content" ).toggle();
+	});
+	</script>
+    <div class="selection_command" tabid="{{ tabid }}">
+      <input type="button" class="selection_btn_edit"  value="edit"></input>
+      <input type="button" class="selection_btn_save"  value="save"></input>
+      <input type="button" class="selection_btn_save_show"  value="save and show"></input>
+      <input type="button" class="selection_btn_reload" value="reload"></input>
+      <input type="button" class="selection_btn_show"  value="show"></input>
+      <input type="button" class="selection_btn_paste"  value="paste clipboard"></input>
+      <input type="button" class="selection_btn_showclip"  value="show clipboard"></input>
+	  <span class="selection_span_info">Warning, your selection is not saved</span>
+    </div>
+	<div class="selection_edit" tabid="{{ tabid }}">
+      <textarea></textarea>
+      <div id="selection_help_portlet" class="column">
+        <div class="portlet">
+          <div class="portlet-header">Help / Markdown language</div>
+          <div class="portlet-content">
+            <div class="portlet-content-inside">
+    <h1>Info</h1>
+    <p>This area is markup language. See <a href="https://github.com/coreyti/showdown">https://github.com/coreyti/showdown</a></p>
+    <p>You can add graphs with this syntax :</p>
+    <blockquote>
+rrdgraph(Collectd_source, host, plugin, plugin_instance, type, type_instance)
+    </blockquote>
+    <p>
+        <code>Collectd_source</code> is mandatory. Fields <code>plugin_instance</code> and <code>type_instance</code> can be left empty. All fields except <code>Collectd_source</code> can be regular expressions to match more than one graph.
+    </p> 
+    <h1>Example</h1>
+<pre>
+# Title #
+## memory for host1 ##
+rrdgraph(localhost, host1, memory,, memory,)
+## load for host1 and 2 ##
+rrdgraph(localhost, host[12], load,, load,)
+## all cpu for host1 ##
+rrdgraph(localhost, host1, cpu, .*, cpu,)
+</pre>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="selection_show" tabid="{{ tabid }}"></div>
+</div>

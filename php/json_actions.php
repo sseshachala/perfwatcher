@@ -1,25 +1,31 @@
 <?php # vim: set filetype=php fdm=marker sw=4 ts=4 et : 
 /**
+ * Copyright (c) 2011 Cyril Feraudet
  *
- * PHP version 5
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
  *
- * LICENSE: This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
  *
  * @category  Monitoring
  * @author    Cyril Feraudet <cyril@feraudet.com>
  * @copyright 2011 Cyril Feraudet
- * @license   http://www.gnu.org/copyleft/lesser.html  LGPL License 2.1
+ * @license   http://opensource.org/licenses/mit-license.php
  * @link      http://www.perfwatcher.org/
- */ 
+ **/ 
 
 header("HTTP/1.0 200 OK");
 header('Content-type: text/json; charset=utf-8');
@@ -35,8 +41,30 @@ $action = isset($_GET['action']) ? $_GET['action'] : $_POST['action'];
 
 $action_need_jstree = 0;
 switch ($action) {
+    case 'get_grouped_type':
+        global $grouped_type;
+        echo json_encode($grouped_type);
+        break;
     case 'get_js':
         echo json_encode($extra_jsfile);
+        break;
+    case 'get_tabs':
+        $id = get_arg('id', 0, 1, "Error : No valid id found !!!", __FILE__, __LINE__);
+        echo json_encode(selection_get_all_with_node_id($id));
+        break;
+    case 'add_tab':
+        $id = get_arg('id', 0, 1, "Error : No valid id found !!!", __FILE__, __LINE__);
+        $deleteafter = 0;
+        if (isset($_POST['lifetime']) && $_POST['lifetime'] > 0) {
+            $deleteafter = time() + $_POST['lifetime'];
+        }
+        $selection_id = selection_create_new($_POST['tab_title'], $id, $deleteafter);
+        echo json_encode(array());
+        break;
+    case 'del_tab':
+        $selection_id = get_arg('selection_id', 0, 1, "Error : No valid id found !!!", __FILE__, __LINE__);
+        selection_delete($selection_id);
+        echo json_encode(array());
         break;
     case 'new_view':
         $view_title = get_arg('view_title', "no name", 0, "", __FILE__, __LINE__);
@@ -65,26 +93,16 @@ if($action_need_jstree) {
 
     $jstree = new json_tree($view_id);
     $res = $jstree->_get_node($id);
-    $datas = $jstree->get_datas($res['id']);
 
     switch ($action) {
-        case 'add_tab':
-            print_r($datas);
-            if (!isset($datas['tabs'])) {
-                $datas['tabs'] = array();
+        case 'get_hosts': 
+            $cdsrc = $jstree->get_node_collectd_source($id);
+            $hosts = array();
+            $children = $jstree->_get_children($id, true, "", "", $cdsrc);
+            foreach($children as $host) {
+                if ($host['pwtype'] == 'server') { $hosts[] = array('title' => $host['title'], 'CdSrc' => $host['CdSrc']); }
             }
-            $id = md5(time().$_POST['tab_title']);
-            $datas['tabs'][$id] = array('tab_title' => $_POST['tab_title'], 'selected_graph' => '');
-            if (isset($_POST['lifetime']) && $_POST['lifetime'] > 0) {
-                $datas['tabs'][$id]['deleteafter'] = time() + $_POST['lifetime'];
-            }
-            $jstree->set_datas($res['id'], $datas);
-            echo json_encode(array());
-            break;
-        case 'del_tab':
-            unset($datas['tabs'][$_POST['tab_id']]);
-            $jstree->set_datas($res['id'], $datas);
-            echo json_encode(array());
+            echo json_encode($hosts);
             break;
         case 'search':
             echo $jstree->searchfield($_GET['term']);

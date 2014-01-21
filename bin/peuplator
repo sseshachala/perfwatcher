@@ -23,6 +23,24 @@ if (isset($argv[1])) {
 $db = new _database($db_config);
 if ($db->connect()) {
 		$result_connect = 1;
+# Clean the database
+#
+# Remove selection with deleteafter>tm
+		$tm = time();
+		$db->prepare("DELETE FROM selections where deleteafter <> 0 AND deleteafter < ?", array('integer'));
+		$db->execute(array((int)$tm));
+
+# Remove selections when there is no item in the tree with selection tree_id
+		$db->prepare("DELETE FROM selections WHERE tree_id NOT IN (SELECT id FROM tree)");
+		$db->execute();
+
+# Remove items in tree when they have no parent
+		$db->prepare("DELETE FROM tree WHERE parent_id NOT IN (SELECT id FROM (SELECT id FROM tree) x) AND parent_id <> 1");
+		$db->execute();
+
+# End of database cleaning
+#
+# Retreive view ids
 		$db->prepare("SELECT distinct view_id FROM tree");
 		$db->execute();
 		while($db->nextr()) {
@@ -38,15 +56,16 @@ foreach($peuplator_plugins as $plugin) {
 }
 
 foreach ($views as $view_id) {
-		global $jstree;
+		if ($debug) { print "============== Working on view $view_id ===============\n"; }
 		$jstree = new json_tree($view_id);
 
-		foreach ($jstree->get_containers() as $container) {
-				$datas = $jstree->get_datas($container['id']);
+		$all_containers = $jstree->get_containers();
+		foreach ($all_containers as $container) {
+				if ($debug) { echo "Working on container ".$container['title']." (".$container['id'].")\n"; }
 				$serverlist = array();
 				foreach($peuplator_plugins as $plugin) {
 						if (!class_exists ($plugin)) { continue; }
-						$oplugin = new $plugin($datas);
+						$oplugin = new $plugin($container);
 						$serverlist = array_merge($serverlist, $oplugin->get());
 				}
 				foreach ($serverlist as $key => $val) {
@@ -56,7 +75,7 @@ foreach ($views as $view_id) {
 						$childrens = $jstree->_get_children($container['id']);
 						$childrenslist = array();
 						foreach($childrens as $children) {
-								if ($children['type'] != 'default') { continue; }
+								if ($children['pwtype'] != 'server') { continue; }
 								if (!in_array($children['title'], $serverlist)) {
 										if ($debug) { echo "Removing child '".$children['title']."' (".$children['id'].") from '".$container['title']."' (".$container['id'].")"."\n"; }
 										$jstree->_remove($children['id']);
